@@ -1,0 +1,23 @@
+#!/bin/bash
+
+repositoryUrl=${bamboo.planRepository.1.repositoryUrl} # source URL
+projectkey=$(echo $repositoryUrl | sed -n 's/.*:7999\/\([^\/]*\)\/.*/\1/p') 
+repoSlug=$(echo $repositoryUrl | sed -n 's/.*\/\([^\/]*\)\.git/\1/p')
+pullRequestId=${bamboo.repository.pr.key}
+pullRequestData=$(curl -u assistant:assistant "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}")
+
+echo "================================================"
+echo "repositoryUrl: ${repositoryUrl}"
+echo "${pullRequestId}"
+echo "${projectkey}"
+echo "${repoSlug}"
+echo "================================================"
+
+# Check if there is a pull request without .sh file changes
+if [[ $pullRequestData != *"\"size\":0"* && $pullRequestData != *".sh"* ]]; then
+  # Perform auto-approval of the pull request
+  curl -X POST -u username:password -H "Content-Type: application/json" -d '{"status": "APPROVED"}' "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}/approve"
+  curl -X POST -u username:password -H "Content-Type: application/json" -d '{"text": "Auto-approve"}' "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}/comments"
+else 
+  curl -X POST -u username:password -H "Content-Type: application/json" -d '{"text": "Cannot auto-approve - .sh file was changed"}' "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}/comments"
+fi
