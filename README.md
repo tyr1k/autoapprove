@@ -12,7 +12,7 @@ Next, the script fetches pull request data from Bitbucket, checks if the pull re
 
 1. Store the script in a location accessible by Bamboo.
 2. In your Bamboo plan, add a task to execute this script. This could be done as a final task in your build plan, or as part of a deployment project.
-3. Ensure that the user credentials used in the script (currently set to `assistant:assistant`) have the necessary permissions to approve pull requests in Bitbucket.
+3. Ensure that the user credentials used in the script (currently set to `username:password`) have the necessary permissions to approve pull requests in Bitbucket.
 
 ## Script
 
@@ -23,7 +23,7 @@ repositoryUrl=${bamboo.planRepository.1.repositoryUrl} # source URL
 projectkey=$(echo $repositoryUrl | sed -n 's/.*:7999\/\([^\/]*\)\/.*/\1/p') 
 repoSlug=$(echo $repositoryUrl | sed -n 's/.*\/\([^\/]*\)\.git/\1/p')
 pullRequestId=${bamboo.repository.pr.key}
-pullRequestData=$(curl -u assistant:assistant "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}")
+pullRequestData=$(curl -u username:password "http://bitbucket/rest/api/1.0/projects/${projectkey}/repos/${repoSlug}/pull-requests/${pullRequestId}")
 
 echo "================================================"
 echo "repositoryUrl: ${repositoryUrl}"
